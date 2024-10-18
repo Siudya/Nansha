@@ -36,18 +36,20 @@ task("soc")
     table.join2(chisel_opts, {"-td", option.get("out-dir")})
     os.execv(os.shell(), chisel_opts)
 
-    os.rm(option.get("out-dir") .. "/firrtl_black_box_resource_files.f")
-    os.rm(option.get("out-dir") .. "/filelist.f")
-    os.rm(option.get("out-dir") .. "/extern_modules.sv")
+    os.rm(path.join(option.get("out-dir"), "firrtl_black_box_resource_files.f"))
+    os.rm(path.join(option.get("out-dir"), "filelist.f"))
+    os.rm(path.join(option.get("out-dir"), "extern_modules.sv"))
 
     local py_exec = "python3"
     if os.host() == "windows" then py_exec = "python" end
-    local postcompile_opts = {"scripts/linknan/postcompile.py", option.get("out-dir"), "-j", option.get("jobs")}
+    local pcmp_scr_path = path.join("scripts", "linknan", "postcompile.py")
+    local postcompile_opts = {pcmp_scr_path, option.get("out-dir"), "-j", option.get("jobs")}
     if option.get("vcs") then table.join2(postcompile_opts, {"--vcs"}) end
     os.execv(py_exec, postcompile_opts)
 
     local harden_table = {"LNTop", "CoreWrapper", "CpuCluster", "DCU"}
-    if option.get("release") then os.execv(py_exec, table.join2({"scripts/linknan/release.py"}, harden_table)) end
+    local rel_scr_path = path.join("scripts", "linknan", "release.py")
+    if option.get("release") then os.execv(py_exec, table.join2(rel_scr_path, harden_table)) end
   end)
 task_end()
 
